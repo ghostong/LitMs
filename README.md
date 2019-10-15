@@ -16,6 +16,7 @@
 require(dirname(__DIR__).'/vendor/autoload.php'); //autoload.php 文件目录
 new \Lit\LitMs\LitMsServer(__DIR__);
 ````
+
 3. 创建配置文件 Config.php
 ````
 <?php
@@ -30,12 +31,13 @@ define("LITMS_DAEMONIZE", false);
 //其他服务设置, 支持swoole_server::set 所有参数, 此参数会覆盖之前配置
 //参考 https://wiki.swoole.com/wiki/page/274.html
 define("SWOOLE_SERVER_SET",array(
-
 ));
 ````
+
 4. 创建控制层文件 Controller.php 
 ````
 <?php
+
 class Controller extends LitMsController {
     function __construct(){
         //注册一个全method路由
