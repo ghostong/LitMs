@@ -3,25 +3,22 @@
  * 基础控制层
  */
 
-
 class LitMsController{
 
     private  $requestCache;
 
-    public function doIt ($request){
+    public function doIt ($request , & $response ){
         $httpRequestUri = $request->server['request_uri'];
         $httpRequestMethod = strtolower($request->server['request_method']);
         if( $this->getRequestCache($httpRequestMethod,$httpRequestUri) ){
             $requestCache = $this->getRequestCache($httpRequestMethod,$httpRequestUri);
-            return $requestCache['callBack']();
+            return $requestCache['callBack']($request,$response);
         }elseif(isset($this->requestCache[$httpRequestUri])){
-            #todo
-            //method not allow
-            return "method not allow";
+            $response->status(404);
+            return "Method Not Allow";
         }else{
-            #todo
-            //404
-            return "404";
+            $response->status(404);
+            return "404 Not Found";
         }
     }
 
@@ -46,8 +43,8 @@ class LitMsController{
     }
 
     private function setRequestCache($requestMethod,$requestUri,$callBack){
-        if(isset($this->requestCache[$requestUri][$requestMethod])){
-            new Exception("路由注册,".$requestMethod,":",$requestUri."重复");
+        if(isset($this->requestCache[$requestUri][$requestMethod]) || isset($this->requestCache[$requestUri]["all"])){
+            throw new \Exception("Routing error,"." duplicate request uri ".$requestMethod.":".$requestUri);
         }
         $this->requestCache[$requestUri][$requestMethod] = array (
             "requestMethod" => $requestMethod,
