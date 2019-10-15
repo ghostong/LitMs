@@ -10,7 +10,7 @@
 
 ###初始化项目
 1. 选定代码根目录,创建 Server.php (任意php文件名)
-2. 粘如一下代码
+2. 粘贴如下代码
 ````PHP
 <?php
 require(dirname(__DIR__).'/vendor/autoload.php'); //autoload.php 文件目录
