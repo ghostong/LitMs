@@ -11,14 +11,14 @@
 ###初始化项目
 1. 选定代码根目录,创建 Server.php (任意php文件名)
 2. 粘如一下代码
-````
+````PHP
 <?php
 require(dirname(__DIR__).'/vendor/autoload.php'); //autoload.php 文件目录
 new \Lit\LitMs\LitMsServer(__DIR__);
 ````
 
 3. 创建配置文件 Config.php
-````
+````PHP
 <?php
 //服务监听IP 默认值 127.0.0.1
 define("LITMS_HTTP_HOST","0.0.0.0");
@@ -35,9 +35,8 @@ define("SWOOLE_SERVER_SET",array(
 ````
 
 4. 创建控制层文件 Controller.php 
-````
+````PHP
 <?php
-
 class Controller extends LitMsController {
     function __construct(){
         //注册一个全method路由
@@ -65,6 +64,6 @@ class Controller extends LitMsController {
 ````
 
 ###启动项目
-````
+````BASH
 php Server.php 
 ````
