@@ -56,7 +56,8 @@ class LitMsServer{
         $outPut .= "|         |_____| |_|  \__| |_|  |_| |___/         |".PHP_EOL;
         $outPut .= "|                                                  |".PHP_EOL;
         $outPut .= "+--------------------------------------------------|".PHP_EOL;
-        $outPut .= "|                                   Power By Ghost |".PHP_EOL;
+        $outPut .= "|                                  Power By Ghost  |".PHP_EOL;
+        $outPut .= "|                                 ghostong@126.com |".PHP_EOL;
         $outPut .= "+--------------------------------------------------+".PHP_EOL;
         echo $outPut;
         echo "Use http://".$this->httpHost.":".$this->httpPort,PHP_EOL;
