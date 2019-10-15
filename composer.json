@@ -1,7 +1,6 @@
 {
     "name": "lit/litms",
     "description": "超轻量级PHP微服务框架",
-    "version": "0.0.1",
     "authors": [
         {
             "name": "litong",
@@ -15,7 +14,7 @@
     "require": {
         "php": ">=7.1.0"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "autoload": {
         "files": [],
         "psr-4": {
