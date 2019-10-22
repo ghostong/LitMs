@@ -1,4 +1,4 @@
-###安装
+### 安装
 ````
 #编辑composer.json文件
 "require" : {
@@ -8,7 +8,7 @@
 #安装后使用文档中的调用方法即可使用.
 ````
 
-###初始化项目
+### 初始化项目
 1. 选定代码根目录,创建 Server.php (任意php文件名)
 2. 粘贴如下代码
 ````PHP
@@ -63,7 +63,7 @@ class Controller extends LitMsController {
 }
 ````
 
-###启动项目
+### 启动项目
 ````BASH
 php Server.php 
 ````
