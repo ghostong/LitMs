@@ -3,23 +3,18 @@
  * LitMs Controller 层
  */
 
-class Controller extends LitMsController {
+class Controller extends Lit\LitMs\LitMsController {
 
     function __construct(){
 
         //注册一个全method路由
         $this->all('/',function ($request,&$response){
-            return "Welcome to LitMs";
-        });
-
-        //注册一个全method路由
-        $this->post('/ao',function ($request,&$response){
-            return "Welcome to LitMs";
+            return Model("Welcome")->welcome();
         });
 
         //注册另一个get路由
-        $this->get("/test",function ($request,&$response){
-            return "Method get";
+        $this->get("/html",function ($request,&$response){
+            return View("HtmlDemo.html");
         });
 
         //注册另一个post路由

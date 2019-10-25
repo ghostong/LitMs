@@ -2,6 +2,7 @@
 /**
  * 基础控制层
  */
+namespace Lit\LitMs;
 
 class LitMsController{
 
@@ -14,11 +15,11 @@ class LitMsController{
             $requestCache = $this->getRequestCache($httpRequestMethod,$httpRequestUri);
             return $requestCache['callBack']($request,$response);
         }elseif(isset($this->requestCache[$httpRequestUri])){
-            $response->status(404);
-            return "Method Not Allow";
+            $response->status(405);
+            return Error(405);
         }else{
             $response->status(404);
-            return "404 Not Found";
+            return Error(404);
         }
     }
 

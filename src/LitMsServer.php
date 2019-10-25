@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * 基础服务
+ */
 namespace Lit\LitMs;
 
 class LitMsServer{
@@ -8,31 +10,44 @@ class LitMsServer{
     private $httpPort;
     private $serverSet;
 
-    function  __construct( $workDir = ''){
-        self::requireBaseFile($workDir);
-        $this->serverConfig();
-        $this->welcome();
-        $this->serverStart();
+    function  __construct( $workDir){ //use __DIR__
+        define("WORK_DIR",$workDir);
+        $this->requireBaseFile(); //基础文件
+        $this->requireModelFile(); //模块文件
+        $this->serverConfig(); //服务配置文件
+        $this->welcome(); //欢迎词
+        $this->serverStart();//启动服务
     }
 
-    private static function requireBaseFile($workDir){
+    private function requireBaseFile(){
         //配置文件
-        $configFile = $workDir.DIRECTORY_SEPARATOR."Config.php";
-        if(!file_exists($configFile)){
+        $configFile = WORK_DIR.DIRECTORY_SEPARATOR."Config.php";
+        if( !file_exists($configFile) ){
             echo "未找到配置文件:".$configFile.PHP_EOL;
         }else{
-            require ( $configFile );
+            require ( $configFile."" );
         }
         //基础函数
         require (__DIR__.DIRECTORY_SEPARATOR."LitMsFunction.php");
         //基础控制层
         require (__DIR__.DIRECTORY_SEPARATOR."LitMsController.php");
+        //基础模块层
+        require (__DIR__.DIRECTORY_SEPARATOR."LitMsModel.php");
         //控制层文件
-        $controllerFile = $workDir.DIRECTORY_SEPARATOR."Controller.php";
-        if(!file_exists($controllerFile)){
+        $controllerFile = WORK_DIR.DIRECTORY_SEPARATOR."Controller.php";
+        if( !file_exists($controllerFile) ){
             echo "未找到Controller文件:".$controllerFile.PHP_EOL;
         }else{
-            require ( $controllerFile );
+            require ( $controllerFile."" );
+        }
+    }
+
+    private function requireModelFile () {
+        $fileIterator = new \FilesystemIterator(WORK_DIR.DIRECTORY_SEPARATOR."Model/");
+        foreach($fileIterator as $fileInfo) {
+            if($fileInfo->isFile()){
+                require_once ($fileInfo->getPathName()."");
+            }
         }
     }
 
@@ -49,11 +64,11 @@ class LitMsServer{
     public function welcome (){
         $outPut = "";
         $outPut .= "+--------------------------------------------------+".PHP_EOL;
-        $outPut .= "|          _       _   _     __  __                |".PHP_EOL;
-        $outPut .= "|         | |     (_) | |_  |  \/  |  ___          |".PHP_EOL;
-        $outPut .= "|         | |     | | | __| | |\/| | / __|         |".PHP_EOL;
-        $outPut .= "|         | |___  | | | |_  | |  | | \__ \         |".PHP_EOL;
-        $outPut .= "|         |_____| |_|  \__| |_|  |_| |___/         |".PHP_EOL;
+        $outPut .= "|   +      _       _   _     __  __            +   |".PHP_EOL;
+        $outPut .= "|   |     | |     (_) | |_  |  \/  |  ___      |   |".PHP_EOL;
+        $outPut .= "|   |     | |     | | | __| | |\/| | / __|     |   |".PHP_EOL;
+        $outPut .= "|   |     | |___  | | | |_  | |  | | \__ \     |   |".PHP_EOL;
+        $outPut .= "|   .     |_____| |_|  \__| |_|  |_| |___/     .   |".PHP_EOL;
         $outPut .= "|                                                  |".PHP_EOL;
         $outPut .= "+--------------------------------------------------|".PHP_EOL;
         $outPut .= "|                                  Power By Ghost  |".PHP_EOL;
@@ -64,12 +79,17 @@ class LitMsServer{
     }
 
     public function serverStart(){
+        ini_set("open_basedir",WORK_DIR);
         try {
             $controller = new \Controller();
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
             $httpServer->set($this->serverSet);
             $httpServer->on('request', function ($request, $response) use ($controller) {
-                $response->end($controller->doIt($request, $response));
+                if(is_file(WORK_DIR.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR.$request->server['request_uri'])){
+                    $response->sendfile(WORK_DIR.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR.$request->server['request_uri']);
+                }else{
+                    $response->end($controller->doIt($request, $response));
+                }
             });
             echo "Server start !", PHP_EOL;
             $httpServer->start();
