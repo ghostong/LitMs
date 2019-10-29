@@ -4,7 +4,7 @@ function Model ( $modelName ) {
     if(class_exists($className)){
         return new $className;
     }else{
-        return Error(50101);
+        return Error(50101,'Model名称 '.$className.' 不存在');
     }
 }
 
