@@ -1,7 +1,11 @@
 <?php
 function Model ( $modelName ) {
     $className = $modelName."Model";
-    return new $className;
+    if(class_exists($className)){
+        return new $className;
+    }else{
+        return Error(50101);
+    }
 }
 
 function View ( $htmlFileName  ) {
@@ -35,6 +39,8 @@ function ErrorCode($code){
     $ErrorCode[405] = "Method Not Allow";
 
     $ErrorCode[50100] = "Model中方法不存在";
+    $ErrorCode[50101] = "Model名不存在";
+
 
     return isset($ErrorCode[$code]) ? $ErrorCode[$code] : "";
 }
