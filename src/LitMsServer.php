@@ -71,11 +71,17 @@ class LitMsServer{
         $outPut .= "|   .     |_____| |_|  \__| |_|  |_| |___/     .   |".PHP_EOL;
         $outPut .= "|                                                  |".PHP_EOL;
         $outPut .= "+--------------------------------------------------|".PHP_EOL;
+        foreach(@swoole_get_local_ip() as $key => $val) {
+            $serverIp = "| Server address ".$key.": ".$val;
+            $outPut .= $serverIp.str_repeat(" ",52-strlen($serverIp)-1)."|".PHP_EOL;
+        }
+        $httpHost = "| Use http://".$this->httpHost.":".$this->httpPort;
+        $outPut .= $httpHost.str_repeat(" ",52-strlen($httpHost)-1)."|".PHP_EOL;
+        $outPut .= "+--------------------------------------------------+".PHP_EOL;
         $outPut .= "|                                  Power By Ghost  |".PHP_EOL;
         $outPut .= "|                                 ghostong@126.com |".PHP_EOL;
         $outPut .= "+--------------------------------------------------+".PHP_EOL;
         echo $outPut;
-        echo "Use http://".$this->httpHost.":".$this->httpPort,PHP_EOL;
     }
 
     public function serverStart(){
