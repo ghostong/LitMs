@@ -20,3 +20,10 @@ define("LITMS_DAEMONIZE", false);
 define("SWOOLE_SERVER_SET",array(
 
 ));
+
+//服务所读取文件限制(安全)目录
+//目录名称请以目录分隔符(DIRECTORY_SEPARATOR)结尾
+define("LITMS_OPEN_BASEDIR",array(
+    __DIR__.DIRECTORY_SEPARATOR, // 当前项目目录
+    dirname(__DIR__).DIRECTORY_SEPARATOR."vendor".DIRECTORY_SEPARATOR, // vendor目录
+));

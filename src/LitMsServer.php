@@ -43,7 +43,7 @@ class LitMsServer{
     }
 
     private function requireModelFile () {
-        $fileIterator = new \FilesystemIterator(WORK_DIR.DIRECTORY_SEPARATOR."Model/");
+        $fileIterator = new \FilesystemIterator(WORK_DIR.DIRECTORY_SEPARATOR."Model".DIRECTORY_SEPARATOR);
         foreach($fileIterator as $fileInfo) {
             if($fileInfo->isFile()){
                 require_once ($fileInfo->getPathName()."");
@@ -85,7 +85,9 @@ class LitMsServer{
     }
 
     public function serverStart(){
-        ini_set("open_basedir",WORK_DIR);
+        if(defined("LITMS_OPEN_BASEDIR") && !empty(LITMS_OPEN_BASEDIR)) { //设置安全目录
+            ini_set("open_basedir",implode(":",LITMS_OPEN_BASEDIR));
+        }
         try {
             $controller = new \Controller();
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
