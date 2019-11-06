@@ -8,19 +8,22 @@ class LitMsController{
 
     private  $requestCache;
 
-    public function doIt ($request , & $response ){
+    public function doIt ($request , & $response){
         $httpRequestUri = $request->server['request_uri'];
         $httpRequestMethod = strtolower($request->server['request_method']);
         if( $this->getRequestCache($httpRequestMethod,$httpRequestUri) ){
             $requestCache = $this->getRequestCache($httpRequestMethod,$httpRequestUri);
             return $requestCache['callBack']($request,$response);
         }elseif(isset($this->requestCache[$httpRequestUri])){
-            $response->status(405);
-            return Error(405);
+            return $this->errorPage($request ,$response,405);
         }else{
-            $response->status(404);
-            return Error(404);
+            return $this->errorPage($request ,$response, 404);
         }
+    }
+
+    public function errorPage ( $request , & $response , $status ){
+        $response->status($status);
+        return Error($status);
     }
 
     public function get ($requestUri,$callBack) {

@@ -13,18 +13,23 @@ class Controller extends Lit\LitMs\LitMsController {
         });
 
         //注册另一个get路由
-        $this->get("/html",function ($request,&$response){
-            return View("HtmlDemo.html");
+        $this->get("/get",function ($request,&$response){
+            return "Method get";
         });
 
         //注册另一个post路由
-        $this->post("/test",function ($request,&$response){
+        $this->post("/post",function ($request,&$response){
             return "Method post";
         });
 
         //注册另一个delete路由
-        $this->delete("/test",function ($request,&$response){
+        $this->delete("/delete",function ($request,&$response){
             return "Method delete";
+        });
+
+        //注册另一个静态页面
+        $this->get("/html",function ($request,&$response){
+            return View("HtmlDemo.html");
         });
 
     }

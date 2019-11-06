@@ -12,13 +12,14 @@ class LitMsServer{
 
     function  __construct( $workDir){ //use __DIR__
         define("WORK_DIR",$workDir);
-        $this->requireBaseFile(); //基础文件
+        $this->requireBaseFile(); //框架基础文件
         $this->requireModelFile(); //模块文件
         $this->serverConfig(); //服务配置文件
         $this->welcome(); //欢迎词
         $this->serverStart();//启动服务
     }
 
+    //框架基础文件
     private function requireBaseFile(){
         //配置文件
         $configFile = WORK_DIR.DIRECTORY_SEPARATOR."Config.php";
@@ -42,8 +43,13 @@ class LitMsServer{
         }
     }
 
+    //用户自定义模块文件
     private function requireModelFile () {
-        $fileIterator = new \FilesystemIterator(WORK_DIR.DIRECTORY_SEPARATOR."Model".DIRECTORY_SEPARATOR);
+        $modelDir = WORK_DIR.DIRECTORY_SEPARATOR."Model".DIRECTORY_SEPARATOR;
+        if(!is_dir($modelDir)){
+            echo "未找到Model目录:".$modelDir.PHP_EOL;
+        }
+        $fileIterator = new \FilesystemIterator($modelDir);
         foreach($fileIterator as $fileInfo) {
             if($fileInfo->isFile()){
                 require_once ($fileInfo->getPathName()."");
@@ -51,6 +57,7 @@ class LitMsServer{
         }
     }
 
+    //swoole配置
     private function serverConfig(){
         $this->httpHost = defined("LITMS_HTTP_HOST")? LITMS_HTTP_HOST : "127.0.0.1";
         $this->httpPort =  defined("LITMS_HTTP_PORT")? LITMS_HTTP_PORT : 8080;
@@ -61,7 +68,8 @@ class LitMsServer{
         }
     }
 
-    public function welcome (){
+    //欢迎画面
+    private function welcome (){
         $outPut = "";
         $outPut .= "+--------------------------------------------------+".PHP_EOL;
         $outPut .= "|   +      _       _   _     __  __            +   |".PHP_EOL;
@@ -84,18 +92,40 @@ class LitMsServer{
         echo $outPut;
     }
 
-    public function serverStart(){
+    //项目可以读取的安全目录
+    private function safeDir (){
         if(defined("LITMS_OPEN_BASEDIR") && !empty(LITMS_OPEN_BASEDIR)) { //设置安全目录
             ini_set("open_basedir",implode(":",LITMS_OPEN_BASEDIR));
         }
+    }
+
+    //静态文件处理
+    private function staticFile( $requestUri ){
+        $requestUri = trim($requestUri,"/");
+        if( strtolower(substr($requestUri,0,6)) == "static" ) {
+            return $requestUri;
+        }else{
+            return "";
+        }
+    }
+
+    //启动服务
+    public function serverStart(){
+        $this->safeDir();  //安全目录
         try {
             $controller = new \Controller();
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
             $httpServer->set($this->serverSet);
             $httpServer->on('request', function ($request, $response) use ($controller) {
-                if(is_file(WORK_DIR.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR.$request->server['request_uri'])){
-                    $response->sendfile(WORK_DIR.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR.$request->server['request_uri']);
-                }else{
+                $staticFile = $this->staticFile($request->server['request_uri']);
+                if( "" != $staticFile ) { //静态文件
+                    $staticFile = WORK_DIR.DIRECTORY_SEPARATOR.$staticFile;
+                    if(is_file($staticFile)){ //静态文件存在
+                        $response->sendfile($staticFile);
+                    }else{ //静态文件不存在
+                        $response->end($controller->errorPage($request, $response,404));
+                    }
+                } else { //非静态文件
                     $response->end($controller->doIt($request, $response));
                 }
             });
