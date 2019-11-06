@@ -84,7 +84,7 @@ return View("HTMLDemo.html");
 ````php
 此目录为静态文件目录, 此目录中的文件通过url地址可以直接访问
 例如:
-    http://hostname/static/css/app.css 
+    http://hostname/css/app.css 
 本框架为动态微服务框架,尽量不要使用静态文件和静态HTML
 ````
 
