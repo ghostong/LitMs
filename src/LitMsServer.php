@@ -63,6 +63,8 @@ class LitMsServer{
         $this->httpPort =  defined("LITMS_HTTP_PORT")? LITMS_HTTP_PORT : 8080;
         $this->serverSet["worker_num"] = defined("LITMS_WORKER_NUM") ?  LITMS_WORKER_NUM : 2;
         $this->serverSet["daemonize"] = defined("LITMS_DAEMONIZE") ?  LITMS_DAEMONIZE : false;
+        $this->serverSet["document_root"] = WORK_DIR.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR;
+        $this->serverSet["enable_static_handler"] =true;
         if ( defined("SWOOLE_SERVER_SET") ) {
             $this->serverSet = array_merge($this->serverSet,SWOOLE_SERVER_SET);
         }
@@ -99,16 +101,6 @@ class LitMsServer{
         }
     }
 
-    //静态文件处理
-    private function staticFile( $requestUri ){
-        $requestUri = trim($requestUri,"/");
-        if( strtolower(substr($requestUri,0,6)) == "static" ) {
-            return $requestUri;
-        }else{
-            return "";
-        }
-    }
-
     //启动服务
     public function serverStart(){
         $this->safeDir();  //安全目录
@@ -117,17 +109,7 @@ class LitMsServer{
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
             $httpServer->set($this->serverSet);
             $httpServer->on('request', function ($request, $response) use ($controller) {
-                $staticFile = $this->staticFile($request->server['request_uri']);
-                if( "" != $staticFile ) { //静态文件
-                    $staticFile = WORK_DIR.DIRECTORY_SEPARATOR.$staticFile;
-                    if(is_file($staticFile)){ //静态文件存在
-                        $response->sendfile($staticFile);
-                    }else{ //静态文件不存在
-                        $response->end($controller->errorPage($request, $response,404));
-                    }
-                } else { //非静态文件
-                    $response->end($controller->doIt($request, $response));
-                }
+                $response->end($controller->doIt($request, $response));
             });
             echo "Server start !", PHP_EOL;
             $httpServer->start();
