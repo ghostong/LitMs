@@ -10,6 +10,8 @@ class LitMsServer{
     private $httpPort;
     private $litMsDir;
     private $workDir;
+    private $isAuthenticate = false;
+    private $authDict = array();
     private $serverConfig = array();
     private $openBaseDir = array();
 
@@ -101,6 +103,13 @@ class LitMsServer{
         return $this;
     }
 
+    //设置 简单身份认证
+    public function setAuthenticate ( array $authDict ){
+        $this->authDict = $authDict;
+        $this->isAuthenticate = true;
+        return $this;
+    }
+
     //框架基础文件
     private function requireBaseFile(){
         //基础函数
@@ -174,7 +183,13 @@ class LitMsServer{
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
             $httpServer->set($this->serverConfig);
             $httpServer->on('request', function ($request, $response) use ($controller) {
-                $response->end($controller->doIt($request, $response));
+                if( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){
+                    $response->header('WWW-Authenticate','Basic realm="LitMs"');
+                    $response->status(401);
+                    $response->end(Error(403));
+                }else{
+                    $response->end($controller->doIt($request, $response));
+                }
             });
             echo "Server start !", PHP_EOL;
             $httpServer->start();
