@@ -101,15 +101,6 @@ class LitMsServer{
         return $this;
     }
 
-    //是否开发模式
-    private function isDevModel(){
-        if( isset($_SERVER["argv"][1]) && $_SERVER["argv"][1] == "dev" ) {
-            return true;
-        }else{
-            return false;
-        }
-    }
-
     //框架基础文件
     private function requireBaseFile(){
         //基础函数
