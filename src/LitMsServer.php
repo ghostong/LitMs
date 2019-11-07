@@ -8,34 +8,121 @@ class LitMsServer{
 
     private $httpHost;
     private $httpPort;
-    private $serverSet;
+    private $litMsDir;
+    private $workDir;
+    private $serverConfig = array();
+    private $openBaseDir = array();
 
-    function  __construct( $workDir){ //use __DIR__
-        define("WORK_DIR",$workDir);
-        $this->requireBaseFile(); //框架基础文件
-        $this->requireModelFile(); //模块文件
-        $this->serverConfig(); //服务配置文件
-        $this->welcome(); //欢迎词
-        $this->serverStart();//启动服务
+    function  __construct(){
+        //默认host
+        $this->httpHost = "127.0.0.1";
+        //默认端口
+        $this->httpPort = 8080;
+        //框架目录
+        $this->litMsDir = __DIR__.DIRECTORY_SEPARATOR;
+        //默认项目目录
+        $this->workDir  = dirname($_SERVER["PWD"].DIRECTORY_SEPARATOR.$_SERVER["PHP_SELF"]).DIRECTORY_SEPARATOR;
+        //默认项目目录常量
+        define("LITMS_WORK_DIR",$this->workDir);
+        //静态文件
+        $this->serverConfig["document_root"] = $this->workDir.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR;
+        $this->serverConfig["enable_static_handler"] =true;
+
+    }
+
+    //设置 http host
+    public function setHttpHost ( string $host ){
+        $this->httpHost = $host;
+        return $this;
+    }
+
+    //设置 http port
+    public function setHttpPort (int $port ) {
+        $this->httpPort = $port;
+        return $this;
+    }
+
+    //设置 项目目录
+    public function setWorkDir ( string $workDir ) {
+        if(substr($workDir,-1) == DIRECTORY_SEPARATOR){
+            $this->workDir = $workDir;
+        }else{
+            $this->workDir = $workDir.DIRECTORY_SEPARATOR;
+        }
+        return $this;
+    }
+
+    //设置 进程数
+    public function setWorkerNum ( int $workerNum ) {
+        $this->serverConfig['worker_num'] = $workerNum;
+        return $this;
+    }
+
+    //设置 守护进程
+    public function setDaemonize ( bool $daemonize ) {
+        $this->serverConfig["daemonize"] = $daemonize;
+        return $this;
+    }
+
+    //设置 日志文件
+    public function setLogFile ( string $logFile ){
+        $this->serverConfig["log_file"] = $logFile;
+        return $this;
+    }
+
+    //设置 日志输出级别
+    public function setLogLevel ( string $logLevel ) {
+        $this->serverConfig["log_level"] = $logLevel;
+        return $this;
+    }
+
+    //设置 慢日志文件
+    public function setSlowLogFile ( string $slowLogFile ) {
+        $this->serverConfig["request_slowlog_file"] = $slowLogFile;
+        return $this;
+    }
+
+    //设置 慢日志时间
+    public function setSlowTimeOut ( int $seconds ){
+        $this->serverConfig["request_slowlog_timeout"] = $seconds;
+        return $this;
+    }
+
+    //设置 静态文件目录
+    public function setDocumentRoot ( string $documentRoot ) {
+        $this->serverConfig["document_root"] = $documentRoot;
+        $this->serverConfig["enable_static_handler"] =true;
+        return $this;
+    }
+
+    //设置 读取安全目录
+    public function setOpenBaseDir ( string $dir ) {
+        $this->openBaseDir[]=$dir;
+        return $this;
+    }
+
+    //是否开发模式
+    private function isDevModel(){
+        if( isset($_SERVER["argv"][1]) && $_SERVER["argv"][1] == "dev" ) {
+            return true;
+        }else{
+            return false;
+        }
     }
 
     //框架基础文件
     private function requireBaseFile(){
-        //配置文件
-        $configFile = WORK_DIR.DIRECTORY_SEPARATOR."Config.php";
-        if( !file_exists($configFile) ){
-            echo "未找到配置文件:".$configFile.PHP_EOL;
-        }else{
-            require ( $configFile."" );
-        }
         //基础函数
-        require (__DIR__.DIRECTORY_SEPARATOR."LitMsFunction.php");
+        require ($this->litMsDir."LitMsFunction.php");
         //基础控制层
-        require (__DIR__.DIRECTORY_SEPARATOR."LitMsController.php");
+        require ($this->litMsDir."LitMsController.php");
         //基础模块层
-        require (__DIR__.DIRECTORY_SEPARATOR."LitMsModel.php");
+        require ($this->litMsDir."LitMsModel.php");
+    }
+
+    private function requireContollerFile(){
         //控制层文件
-        $controllerFile = WORK_DIR.DIRECTORY_SEPARATOR."Controller.php";
+        $controllerFile = $this->workDir."Controller.php";
         if( !file_exists($controllerFile) ){
             echo "未找到Controller文件:".$controllerFile.PHP_EOL;
         }else{
@@ -45,7 +132,7 @@ class LitMsServer{
 
     //用户自定义模块文件
     private function requireModelFile () {
-        $modelDir = WORK_DIR.DIRECTORY_SEPARATOR."Model".DIRECTORY_SEPARATOR;
+        $modelDir = $this->workDir."Model".DIRECTORY_SEPARATOR;
         if(!is_dir($modelDir)){
             echo "未找到Model目录:".$modelDir.PHP_EOL;
         }
@@ -57,16 +144,10 @@ class LitMsServer{
         }
     }
 
-    //swoole配置
-    private function serverConfig(){
-        $this->httpHost = defined("LITMS_HTTP_HOST")? LITMS_HTTP_HOST : "127.0.0.1";
-        $this->httpPort =  defined("LITMS_HTTP_PORT")? LITMS_HTTP_PORT : 8080;
-        $this->serverSet["worker_num"] = defined("LITMS_WORKER_NUM") ?  LITMS_WORKER_NUM : 2;
-        $this->serverSet["daemonize"] = defined("LITMS_DAEMONIZE") ?  LITMS_DAEMONIZE : false;
-        $this->serverSet["document_root"] = WORK_DIR.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR;
-        $this->serverSet["enable_static_handler"] =true;
-        if ( defined("SWOOLE_SERVER_SET") ) {
-            $this->serverSet = array_merge($this->serverSet,SWOOLE_SERVER_SET);
+    //项目可以读取的安全目录
+    private function safeDir (){
+        if (!empty($this->openBaseDir)) {
+            ini_set("open_basedir",implode(":",$this->openBaseDir));
         }
     }
 
@@ -94,20 +175,13 @@ class LitMsServer{
         echo $outPut;
     }
 
-    //项目可以读取的安全目录
-    private function safeDir (){
-        if(defined("LITMS_OPEN_BASEDIR") && !empty(LITMS_OPEN_BASEDIR)) { //设置安全目录
-            ini_set("open_basedir",implode(":",LITMS_OPEN_BASEDIR));
-        }
-    }
-
     //启动服务
-    public function serverStart(){
+    private function serverStart(){
         $this->safeDir();  //安全目录
         try {
             $controller = new \Controller();
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
-            $httpServer->set($this->serverSet);
+            $httpServer->set($this->serverConfig);
             $httpServer->on('request', function ($request, $response) use ($controller) {
                 $response->end($controller->doIt($request, $response));
             });
@@ -116,6 +190,20 @@ class LitMsServer{
         }catch ( \Exception $e ) {
             echo "Server started error :".$e->getMessage(),PHP_EOL;
         }
+    }
+
+    //启动服务
+    public function run () {
+        //载入框架基础文件
+        $this->requireBaseFile();
+        //载入控制层
+        $this->requireContollerFile();
+        //载入用户自定义模块
+        $this->requireModelFile();
+        //欢迎词
+        $this->welcome();
+        //启动服务
+        $this->serverStart();
     }
 }
 

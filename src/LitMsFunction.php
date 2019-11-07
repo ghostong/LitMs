@@ -10,7 +10,7 @@ function Model ( $modelName ) {
 
 function View ( $htmlFileName  ) {
     $htmlFileName = str_replace("..","",$htmlFileName);
-    return @file_get_contents(WORK_DIR.DIRECTORY_SEPARATOR."View".DIRECTORY_SEPARATOR.$htmlFileName);
+    return @file_get_contents(LITMS_WORK_DIR.DIRECTORY_SEPARATOR."View".DIRECTORY_SEPARATOR.$htmlFileName);
 }
 
 function Success(  Array $param = [] ){
