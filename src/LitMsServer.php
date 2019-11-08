@@ -10,6 +10,7 @@ class LitMsServer{
     private $httpPort;
     private $litMsDir;
     private $workDir;
+    private $onStartFile;
     private $isAuthenticate = false;
     private $authDict = array();
     private $serverConfig = array();
@@ -110,6 +111,16 @@ class LitMsServer{
         return $this;
     }
 
+    //设置 启动钩子
+    public function setOnStart( $onStartFile ){
+        if(is_file($onStartFile)){
+            $this->onStartFile = $onStartFile;
+        }else{
+            $this->onStartFile = "";
+        }
+        return $this;
+    }
+
     //框架基础文件
     private function requireBaseFile(){
         //基础函数
@@ -120,6 +131,7 @@ class LitMsServer{
         require ($this->litMsDir."LitMsModel.php");
     }
 
+    //导入控制层
     private function requireContollerFile(){
         //控制层文件
         $controllerFile = $this->workDir."Controller.php";
@@ -151,6 +163,13 @@ class LitMsServer{
         }
     }
 
+    //启动前时调用一次
+    private function onStart () {
+        if ( $this->onStartFile ) {
+            require_once ($this->onStartFile."");
+        }
+    }
+
     //欢迎画面
     private function welcome (){
         $outPut = "";
@@ -177,7 +196,6 @@ class LitMsServer{
 
     //启动服务
     private function serverStart(){
-        $this->safeDir();  //安全目录
         try {
             $controller = new \Controller();
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
@@ -208,6 +226,10 @@ class LitMsServer{
         $this->requireModelFile();
         //欢迎词
         $this->welcome();
+        //安全目录
+        $this->safeDir();
+        //当启动时调用
+        $this->onStart();
         //启动服务
         $this->serverStart();
     }
