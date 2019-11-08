@@ -25,8 +25,6 @@ class LitMsServer{
         $this->litMsDir = __DIR__.DIRECTORY_SEPARATOR;
         //默认项目目录
         $this->workDir  = dirname($_SERVER["PWD"].DIRECTORY_SEPARATOR.$_SERVER["PHP_SELF"]).DIRECTORY_SEPARATOR;
-        //默认项目目录常量
-        define("LITMS_WORK_DIR",$this->workDir);
         //静态文件
         $this->serverConfig["document_root"] = $this->workDir.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR;
         $this->serverConfig["enable_static_handler"] =true;
@@ -163,6 +161,12 @@ class LitMsServer{
         }
     }
 
+    //设置框架常量
+    private function setDefault (){
+        //默认项目目录常量
+        define("LITMS_WORK_DIR",$this->workDir);
+    }
+
     //启动前时调用一次
     private function onStart () {
         if ( $this->onStartFile ) {
@@ -228,6 +232,8 @@ class LitMsServer{
         $this->welcome();
         //安全目录
         $this->safeDir();
+        //设置框架常量
+        $this->setDefault();
         //当启动时调用
         $this->onStart();
         //启动服务
