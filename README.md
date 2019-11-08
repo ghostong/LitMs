@@ -34,6 +34,7 @@ $server
     ->setSlowTimeOut(1)    //设置慢日志时间
     ->setDocumentRoot(__DIR__.DIRECTORY_SEPARATOR."Static")    //设置静态目录
     ->setAuthenticate(['user1'=>'123','user2'=>'234','user3'=>'345'])    //开启简单身份认证,设置用户名密码
+    ->setOnStart(__DIR__.DIRECTORY_SEPARATOR."OnStart.php")     //设置启动时先执行的一个文件
     ->run();
 ````
 
