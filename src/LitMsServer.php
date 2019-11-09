@@ -170,31 +170,38 @@ class LitMsServer{
     //启动前时调用一次
     private function onStart () {
         if ( $this->onStartFile ) {
+            $outPut = "";
+            $outPut .= $this->terminalDrawLine(52);
+            $outPut .= $this->terminalDrawRow("On Start v",52,"middle");
+            echo $outPut,PHP_EOL;
             require_once ($this->onStartFile."");
+            $outPut = "";
+            $outPut .= $this->terminalDrawRow("On Start ^",52,"middle");
+            $outPut .= $this->terminalDrawLine(52);
+            echo PHP_EOL,$outPut;
         }
     }
 
     //欢迎画面
     private function welcome (){
         $outPut = "";
-        $outPut .= "+--------------------------------------------------+".PHP_EOL;
-        $outPut .= "|   +      _       _   _     __  __            +   |".PHP_EOL;
-        $outPut .= "|   |     | |     (_) | |_  |  \/  |  ___      |   |".PHP_EOL;
-        $outPut .= "|   |     | |     | | | __| | |\/| | / __|     |   |".PHP_EOL;
-        $outPut .= "|   |     | |___  | | | |_  | |  | | \__ \     |   |".PHP_EOL;
-        $outPut .= "|   .     |_____| |_|  \__| |_|  |_| |___/     .   |".PHP_EOL;
-        $outPut .= "|                                                  |".PHP_EOL;
-        $outPut .= "+--------------------------------------------------|".PHP_EOL;
+        $outPut .= $this->terminalDrawLine(52);
+        $outPut .= $this->terminalDrawRow("+      _       _   _     __  __            +",52,"middle");
+        $outPut .= $this->terminalDrawRow("|     | |     (_) | |_  |  \/  |  ___      |",52,"middle");
+        $outPut .= $this->terminalDrawRow("|     | |     | | | __| | |\/| | / __|     |",52,"middle");
+        $outPut .= $this->terminalDrawRow("|     | |___  | | | |_  | |  | | \__ \     |",52,"middle");
+        $outPut .= $this->terminalDrawRow(".     |_____| |_|  \__| |_|  |_| |___/     .",52,"middle");
+        $outPut .= $this->terminalDrawRow(" ",52,"middle");
+        $outPut .= $this->terminalDrawLine(52);
         foreach(@swoole_get_local_ip() as $key => $val) {
-            $serverIp = "| Server address ".$key.": ".$val;
-            $outPut .= $serverIp.str_repeat(" ",52-strlen($serverIp)-1)."|".PHP_EOL;
+            $outPut .= $this->terminalDrawRow("Server address ".$key.": ".$val,52,"left");
         }
-        $httpHost = "| Use http://".$this->httpHost.":".$this->httpPort;
-        $outPut .= $httpHost.str_repeat(" ",52-strlen($httpHost)-1)."|".PHP_EOL;
-        $outPut .= "+--------------------------------------------------+".PHP_EOL;
-        $outPut .= "|                                  Power By Ghost  |".PHP_EOL;
-        $outPut .= "|                                 ghostong@126.com |".PHP_EOL;
-        $outPut .= "+--------------------------------------------------+".PHP_EOL;
+        $httpHost = "Use http://".$this->httpHost.":".$this->httpPort;
+        $outPut .= $this->terminalDrawRow($httpHost,52,"left");
+        $outPut .= $this->terminalDrawLine(52);
+        $outPut .= $this->terminalDrawRow(" Power By Ghost ",52,"right");
+        $outPut .= $this->terminalDrawRow("ghostong@126.com",52,"right");
+        $outPut .= $this->terminalDrawLine(52);
         echo $outPut;
     }
 
@@ -228,16 +235,44 @@ class LitMsServer{
         $this->requireContollerFile();
         //载入用户自定义模块
         $this->requireModelFile();
-        //欢迎词
-        $this->welcome();
         //安全目录
         $this->safeDir();
         //设置框架常量
         $this->setDefault();
         //当启动时调用
         $this->onStart();
+        //欢迎词
+        $this->welcome();
         //启动服务
         $this->serverStart();
     }
-}
 
+
+    //终端线
+    private function terminalDrawLine( $width ){
+        $start = "+";
+        $end = "+";
+        $line = $start . str_repeat("-",$width-2) . $end .PHP_EOL;
+        return $line;
+    }
+
+    //终端行
+    private function terminalDrawRow( $str, $width , $margin){
+        $start = "|";
+        $end = "|";
+        if(strlen($str)+4 >= $width){
+            $str = substr($str,0,$width-4);
+        }
+        if ($margin == "right") {
+            $str = $str." ";
+            $line = $start.str_repeat(" ",$width-2-strlen($str)).$str.$end.PHP_EOL;
+        }elseif($margin == "middle"){
+            $str = $str;
+            $line = $start.str_repeat(" ",ceil(($width-2-strlen($str))/2)).$str.str_repeat(" ",floor(($width-2-strlen($str))/2)).$end.PHP_EOL;
+        }else{
+            $str = " ".$str;
+            $line = $start.$str.str_repeat(" ",$width-2-strlen($str)).$end.PHP_EOL;
+        }
+        return $line;
+    }
+}
