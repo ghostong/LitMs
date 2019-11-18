@@ -194,7 +194,7 @@ class LitMsServer{
         $outPut .= $this->terminalDrawRow(" ",52,"middle");
         $outPut .= $this->terminalDrawLine(52);
         foreach(@swoole_get_local_ip() as $key => $val) {
-            $outPut .= $this->terminalDrawRow("Server address ".$key.": ".$val,52,"left");
+            $outPut .= $this->terminalDrawRow("IP address for ".$key.": ".$val,52,"left");
         }
         $httpHost = "Use http://".$this->httpHost.":".$this->httpPort;
         $outPut .= $this->terminalDrawRow($httpHost,52,"left");
