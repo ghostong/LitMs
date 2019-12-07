@@ -7,7 +7,7 @@ namespace Lit\LitMs;
 class LitMsModel{
 
     //单例缓存变量
-    static private $instance;
+    static private $instance = array();
 
     function __construct(){
 
@@ -15,11 +15,11 @@ class LitMsModel{
 
     //单例获取
     static public function getInstance(){
-        if (!self::$instance instanceof self) {
-            $className = get_called_class();
-            self::$instance = new $className ();
+        $className = get_called_class();
+        if (!isset (self::$instance[$className]) || !is_object(self::$instance[$className])) {
+            self::$instance[$className] = new $className ();
         }
-        return self::$instance;
+        return self::$instance[$className];
     }
 
     public function __call($name, $arguments){
