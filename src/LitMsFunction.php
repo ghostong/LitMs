@@ -1,9 +1,13 @@
 <?php
 //载入模块
-function Model ( $modelName ) {
+function Model ( $modelName, $instantiate = false ) {
     $className = $modelName."Model";
     if(class_exists($className)){
-        return new $className;
+        if($instantiate) {
+            return new $className;
+        }else{
+            return $className::getInstance();
+        }
     }else{
         return Error(50101,'Model名称 '.$className.' 不存在');
     }
