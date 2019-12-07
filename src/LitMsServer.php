@@ -24,7 +24,11 @@ class LitMsServer{
         //框架目录
         $this->litMsDir = __DIR__.DIRECTORY_SEPARATOR;
         //默认项目目录
-        $this->workDir  = dirname($_SERVER["PWD"].DIRECTORY_SEPARATOR.$_SERVER["PHP_SELF"]).DIRECTORY_SEPARATOR;
+        if(isset($_SERVER["PWD"])) {
+            $this->workDir  = dirname($_SERVER["PWD"].DIRECTORY_SEPARATOR.$_SERVER["PHP_SELF"]).DIRECTORY_SEPARATOR;
+        }else{
+            $this->workDir  = DIRECTORY_SEPARATOR."workdir".DIRECTORY_SEPARATOR;
+        }
         //静态文件
         $this->serverConfig["document_root"] = $this->workDir.DIRECTORY_SEPARATOR."Static".DIRECTORY_SEPARATOR;
         $this->serverConfig["enable_static_handler"] =true;
