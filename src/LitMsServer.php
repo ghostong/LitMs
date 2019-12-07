@@ -24,7 +24,7 @@ class LitMsServer{
         //框架目录
         $this->litMsDir = __DIR__.DIRECTORY_SEPARATOR;
         //默认项目目录
-        if(isset($_SERVER["PWD"])) {
+        if(isset($_SERVER["PWD"]) && $_SERVER["PWD"]) {
             $this->workDir  = dirname($_SERVER["PWD"].DIRECTORY_SEPARATOR.$_SERVER["PHP_SELF"]).DIRECTORY_SEPARATOR;
         }else{
             $this->workDir  = DIRECTORY_SEPARATOR."workdir".DIRECTORY_SEPARATOR;
