@@ -223,7 +223,7 @@ class LitMsServer{
         try {
             $controller = new \Controller();
             if ( $this->sslConnect ){
-                $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort, SWOOLE_PROCESS, SWOOLE_HTTP | SWOOLE_SSL);
+                $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort, SWOOLE_PROCESS, SWOOLE_SOCK_TCP | SWOOLE_SSL);
             }else{
                 $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
             }
