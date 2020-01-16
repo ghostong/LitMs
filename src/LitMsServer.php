@@ -15,6 +15,7 @@ class LitMsServer{
     private $authDict = array();
     private $serverConfig = array();
     private $openBaseDir = array();
+    private $sslConnect=false;
 
     function  __construct(){
         //默认host
@@ -123,6 +124,14 @@ class LitMsServer{
         return $this;
     }
 
+    //设置 SSL证书
+    public function setSslCertFile( $sslCertFile, $sslKeyFile ){
+        $this->sslConnect = true;
+        $this->serverConfig["ssl_cert_file"] = $sslCertFile;
+        $this->serverConfig["ssl_key_file"] = $sslKeyFile;
+        return $this;
+    }
+
     //框架基础文件
     private function requireBaseFile(){
         //基础函数
@@ -213,7 +222,11 @@ class LitMsServer{
     private function serverStart(){
         try {
             $controller = new \Controller();
-            $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
+            if ( $this->sslConnect ){
+                $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort, SWOOLE_PROCESS, SWOOLE_HTTP | SWOOLE_SSL);
+            }else{
+                $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
+            }
             $httpServer->set($this->serverConfig);
             $httpServer->on('request', function ($request, $response) use ($controller) {
                 if( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){
@@ -271,7 +284,6 @@ class LitMsServer{
             $str = $str." ";
             $line = $start.str_repeat(" ",$width-2-strlen($str)).$str.$end.PHP_EOL;
         }elseif($margin == "middle"){
-            $str = $str;
             $line = $start.str_repeat(" ",ceil(($width-2-strlen($str))/2)).$str.str_repeat(" ",floor(($width-2-strlen($str))/2)).$end.PHP_EOL;
         }else{
             $str = " ".$str;
