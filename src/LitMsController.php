@@ -8,7 +8,7 @@ class LitMsController{
 
     private  $requestCache;
 
-    public function doIt ($request , & $response){
+    public function doIt ( $request , $response ){
         $httpRequestUri = $request->server['request_uri'];
         $httpRequestMethod = strtolower($request->server['request_method']);
         if( $this->getRequestCache($httpRequestMethod,$httpRequestUri) ){
@@ -21,7 +21,7 @@ class LitMsController{
         }
     }
 
-    public function errorPage ( $request , & $response , $status ){
+    public function errorPage ( $request , $response , $status ){
         $response->status($status);
         return Error($status);
     }
