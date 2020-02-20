@@ -2,14 +2,10 @@
 //载入模块
 function Model ( $modelName, $instantiate = false ) {
     $className = $modelName."Model";
-    if(class_exists($className)){
-        if($instantiate) {
-            return new $className;
-        }else{
-            return $className::getInstance();
-        }
+    if($instantiate) {
+        return new $className;
     }else{
-        return Error(50101,'Model名称 '.$className.' 不存在');
+        return $className::getInstance();
     }
 }
 

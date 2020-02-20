@@ -142,12 +142,23 @@ class LitMsServer{
         require ($this->litMsDir."LitMsModel.php");
     }
 
+    //导入过滤器
+    private function requireFilterFile(){
+        //控制层文件
+        $filterFile = $this->workDir."Filter.php";
+        if( !file_exists($filterFile) ){
+            echo "未找到Filter文件: ".$filterFile.PHP_EOL;
+        }else{
+            require ( $filterFile."" );
+        }
+    }
+
     //导入控制层
     private function requireContollerFile(){
         //控制层文件
         $controllerFile = $this->workDir."Controller.php";
         if( !file_exists($controllerFile) ){
-            echo "未找到Controller文件:".$controllerFile.PHP_EOL;
+            echo "未找到Controller文件: ".$controllerFile.PHP_EOL;
         }else{
             require ( $controllerFile."" );
         }
@@ -158,12 +169,11 @@ class LitMsServer{
         $modelDir = $this->workDir."Model".DIRECTORY_SEPARATOR;
         if(!is_dir($modelDir)){
             echo "未找到Model目录:".$modelDir.PHP_EOL;
-        }
-        $fileIterator = new \FilesystemIterator($modelDir);
-        foreach($fileIterator as $fileInfo) {
-            if($fileInfo->isFile()){
-                require_once ($fileInfo->getPathName()."");
-            }
+        }else{
+            set_include_path(get_include_path().PATH_SEPARATOR.$modelDir);
+            spl_autoload_register(function( $className ) {
+                spl_autoload( $className );
+            });
         }
     }
 
@@ -221,6 +231,7 @@ class LitMsServer{
     //启动服务
     private function serverStart(){
         try {
+            $filter = new \Filter();
             $controller = new \Controller();
             if ( $this->sslConnect ){
                 $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort, SWOOLE_PROCESS, SWOOLE_SOCK_TCP | SWOOLE_SSL);
@@ -228,13 +239,17 @@ class LitMsServer{
                 $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
             }
             $httpServer->set($this->serverConfig);
-            $httpServer->on('request', function ($request, $response) use ($controller) {
+            $httpServer->on('request', function ($request, $response) use ($filter,$controller) {
                 if( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){
                     $response->header('WWW-Authenticate','Basic realm="LitMs"');
                     $response->status(401);
                     $response->end(Error(403));
                 }else{
-                    $response->end($controller->doIt($request, $response));
+                    if ( $filter->doIt($request, $response) ){
+                        $response->end($controller->doIt($request, $response));
+                    }else{
+                        $response->end(Error($filter->getErrorCode(),$filter->getErrorMessage()));
+                    }
                 }
             });
             echo "Server start !", PHP_EOL;
@@ -248,6 +263,8 @@ class LitMsServer{
     public function run () {
         //载入框架基础文件
         $this->requireBaseFile();
+        //导入过滤器
+        $this->requireFilterFile();
         //载入控制层
         $this->requireContollerFile();
         //载入用户自定义模块
