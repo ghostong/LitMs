@@ -167,9 +167,6 @@ class LitMsServer{
             echo "未找到Model目录:".$modelDir.PHP_EOL;
         }else{
             set_include_path(get_include_path().PATH_SEPARATOR.$modelDir);
-            spl_autoload_register(function( $className ) {
-                spl_autoload( $className );
-            });
         }
     }
 
