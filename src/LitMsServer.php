@@ -236,7 +236,9 @@ class LitMsServer{
             }
             $httpServer->set($this->serverConfig);
             $httpServer->on('request', function ($request, $response) use ($filter,$controller) {
-                if( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){ //如果简单身份认证
+                if ($request->server['path_info'] == '/favicon.ico' || $request->server['request_uri'] == '/favicon.ico') {
+                    $response->end();
+                }elseif( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){ //如果简单身份认证
                     $response->header('WWW-Authenticate','Basic realm="LitMs"');
                     $response->status(401);
                     $response->end(Error(403));
