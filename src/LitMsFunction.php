@@ -2,7 +2,7 @@
 //载入模块
 function Model ( $modelName, $instantiate = false ) {
     $className = $modelName."Model";
-    require_once ($className.".php");
+    spl_autoload($className);
     if($instantiate) {
         return new $className;
     }else{
