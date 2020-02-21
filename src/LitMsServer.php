@@ -6,11 +6,11 @@ namespace Lit\LitMs;
 
 class LitMsServer{
 
-    private $httpHost;
-    private $httpPort;
-    private $litMsDir;
-    private $workDir;
-    private $onStartFile;
+    private $httpHost="127.0.0.1"; //默认host
+    private $httpPort="8080"; //默认端口
+    private $litMsDir="";
+    private $workDir="";
+    private $onStartFile="";
     private $isAuthenticate = false;
     private $authDict = array();
     private $serverConfig = array();
@@ -18,10 +18,6 @@ class LitMsServer{
     private $sslConnect=false;
 
     function  __construct(){
-        //默认host
-        $this->httpHost = "127.0.0.1";
-        //默认端口
-        $this->httpPort = 8080;
         //框架目录
         $this->litMsDir = __DIR__.DIRECTORY_SEPARATOR;
         //默认项目目录
@@ -134,37 +130,37 @@ class LitMsServer{
 
     //框架基础文件
     private function requireBaseFile(){
-        //基础函数
-        require ($this->litMsDir."LitMsFunction.php");
-        //基础控制层
-        require ($this->litMsDir."LitMsController.php");
-        //基础模块层
-        require ($this->litMsDir."LitMsModel.php");
-    }
-
-    //导入过滤器
-    private function requireFilterFile(){
-        //控制层文件
-        $filterFile = $this->workDir."Filter.php";
-        if( !file_exists($filterFile) ){
-            echo "未找到Filter文件: ".$filterFile.PHP_EOL;
-        }else{
-            require ( $filterFile."" );
+        $fileList= [
+            "LitMsFunction"   => $this->litMsDir."LitMsFunction.php", //函数文件
+            "LitMsFilter"     => $this->litMsDir."LitMsFilter.php", //基础过滤器文件
+            "LitMsController" => $this->litMsDir."LitMsController.php", //基础控制文件
+            "LitMsModel"      => $this->litMsDir."LitMsModel.php" //基础模块文件
+        ];
+        foreach ( $fileList as $name => $file) {
+            if( !file_exists($file) ){
+                echo "未找到".$name."文件: ".$file.PHP_EOL;
+            }else{
+                require( $file."" );
+            }
         }
     }
 
-    //导入控制层
-    private function requireContollerFile(){
-        //控制层文件
-        $controllerFile = $this->workDir."Controller.php";
-        if( !file_exists($controllerFile) ){
-            echo "未找到Controller文件: ".$controllerFile.PHP_EOL;
-        }else{
-            require ( $controllerFile."" );
+    //导如用户必定义文件
+    private function requireUserFile(){
+        $fileList= [
+            "Filter"     => $this->workDir."Filter.php",    //过滤器文件
+            "Controller" => $this->workDir."Controller.php" //路由控制文件
+        ];
+        foreach ( $fileList as $name => $file) {
+            if( !file_exists($file) ){
+                echo "未找到".$name."文件: ".$file.PHP_EOL;
+            }else{
+                require( $file."" );
+            }
         }
     }
 
-    //用户自定义模块文件
+    //用户自动加载
     private function requireModelFile () {
         $modelDir = $this->workDir."Model".DIRECTORY_SEPARATOR;
         if(!is_dir($modelDir)){
@@ -240,16 +236,14 @@ class LitMsServer{
             }
             $httpServer->set($this->serverConfig);
             $httpServer->on('request', function ($request, $response) use ($filter,$controller) {
-                if( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){
+                if( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){ //如果简单身份认证
                     $response->header('WWW-Authenticate','Basic realm="LitMs"');
                     $response->status(401);
                     $response->end(Error(403));
-                }else{
-                    if ( $filter->doIt($request, $response) ){
-                        $response->end($controller->doIt($request, $response));
-                    }else{
-                        $response->end(Error($filter->getErrorCode(),$filter->getErrorMessage()));
-                    }
+                }elseif(!$filter->doIt($request, $response) ){ //如果过滤器
+                    $response->end(Error($filter->getErrorCode(),$filter->getErrorMessage()));
+                }else{ //正常逻辑
+                    $response->end($controller->doIt($request, $response));
                 }
             });
             echo "Server start !", PHP_EOL;
@@ -263,10 +257,8 @@ class LitMsServer{
     public function run () {
         //载入框架基础文件
         $this->requireBaseFile();
-        //导入过滤器
-        $this->requireFilterFile();
-        //载入控制层
-        $this->requireContollerFile();
+        //导入用户必定义文件
+        $this->requireUserFile();
         //载入用户自定义模块
         $this->requireModelFile();
         //安全目录

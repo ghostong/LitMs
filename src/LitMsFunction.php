@@ -28,7 +28,7 @@ function Success(  Array $param = [] ){
 function Error( $code = 0 ,$message = "" ){
     $outPut["success"] = 0;
     $outPut["responseCode"] = (int) $code;
-    $outPut["responseMessage"] = $message ? : ( ErrorCode($code) ? : "失败" );
+    $outPut["responseMessage"] = $message ? : ( ErrorMsg($code) ? : "失败" );
     $outPut["response"] = [];
     return OutPut($outPut);
 }
@@ -40,14 +40,10 @@ function OutPut( Array $outPut ){
 }
 
 //错误码
-function ErrorCode($code){
+function ErrorMsg($code){
     $ErrorCode[403] = "Forbidden";
     $ErrorCode[404] = "Not Found";
     $ErrorCode[405] = "Method Not Allow";
-
-    $ErrorCode[50100] = "Model中方法不存在";
-    $ErrorCode[50101] = "Model名不存在";
-
     return isset($ErrorCode[$code]) ? $ErrorCode[$code] : "";
 }
 

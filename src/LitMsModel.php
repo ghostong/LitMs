@@ -9,10 +9,6 @@ class LitMsModel{
     //单例缓存变量
     static private $instance = array();
 
-    function __construct(){
-
-    }
-
     //单例获取
     static public function getInstance(){
         $className = get_called_class();
@@ -22,8 +18,5 @@ class LitMsModel{
         return self::$instance[$className];
     }
 
-    public function __call($name, $arguments){
-        return Error(50100, "方法".$name."不存在");
-    }
 
 }

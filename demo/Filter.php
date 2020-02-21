@@ -10,8 +10,12 @@ class Filter extends Lit\LitMs\LitMsFilter {
     }
 
 //    function rule2 ( $request,$response ) {
-//        $this->setError(1,__FUNCTION__);
-//        return false;
+//        if ($request->get["a"] == 1) {
+//            return true;
+//        }else{
+//            $this->setError(1,__FUNCTION__);
+//            return false;
+//        }
 //    }
 
 }
