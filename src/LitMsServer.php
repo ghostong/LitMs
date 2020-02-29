@@ -4,7 +4,7 @@
  */
 namespace Lit\LitMs;
 
-class LitMsServer{
+class LitMsServer {
 
     private $httpHost="127.0.0.1"; //默认host
     private $httpPort="8080"; //默认端口
@@ -16,6 +16,7 @@ class LitMsServer{
     private $serverConfig = array();
     private $openBaseDir = array();
     private $sslConnect=false;
+    private $terminalWidth=52;
 
     function  __construct(){
         //框架目录
@@ -131,10 +132,12 @@ class LitMsServer{
     //框架基础文件
     private function requireBaseFile(){
         $fileList= [
-            "LitMsFunction"   => $this->litMsDir."LitMsFunction.php", //函数文件
-            "LitMsFilter"     => $this->litMsDir."LitMsFilter.php", //基础过滤器文件
-            "LitMsController" => $this->litMsDir."LitMsController.php", //基础控制文件
-            "LitMsModel"      => $this->litMsDir."LitMsModel.php" //基础模块文件
+            "LitMsTerminalDraw"=> $this->litMsDir."LitMsTerminalDraw.php", //函数文件
+            "LitMsFunction"    => $this->litMsDir."LitMsFunction.php", //函数文件
+            "LitMsFilter"      => $this->litMsDir."LitMsFilter.php", //基础过滤器文件
+            "LitMsController"  => $this->litMsDir."LitMsController.php", //基础控制文件
+            "LitMsModel"       => $this->litMsDir."LitMsModel.php", //基础模块文件
+            "LitMsSchedule"    => $this->litMsDir."LitMsSchedule.php" //定时任务
         ];
         foreach ( $fileList as $name => $file) {
             if( !file_exists($file) ){
@@ -149,7 +152,8 @@ class LitMsServer{
     private function requireUserFile(){
         $fileList= [
             "Filter"     => $this->workDir."Filter.php",    //过滤器文件
-            "Controller" => $this->workDir."Controller.php" //路由控制文件
+            "Controller" => $this->workDir."Controller.php" ,//路由控制文件
+            "Schedule" => $this->workDir."Schedule.php" //定时任务
         ];
         foreach ( $fileList as $name => $file) {
             if( !file_exists($file) ){
@@ -189,38 +193,15 @@ class LitMsServer{
     private function onStart () {
         if ( $this->onStartFile ) {
             $outPut = "";
-            $outPut .= $this->terminalDrawLine(52);
-            $outPut .= $this->terminalDrawRow("On Start v",52,"middle");
+            $outPut .= LitMsTerminalDraw::terminalDrawLine($this->terminalWidth);
+            $outPut .= LitMsTerminalDraw::terminalDrawRow("On Start v",$this->terminalWidth,"middle");
             echo $outPut,PHP_EOL;
             require_once ($this->onStartFile."");
             $outPut = "";
-            $outPut .= $this->terminalDrawRow("On Start ^",52,"middle");
-            $outPut .= $this->terminalDrawLine(52);
+            $outPut .= LitMsTerminalDraw::terminalDrawRow("On Start ^",$this->terminalWidth,"middle");
+            $outPut .= LitMsTerminalDraw::terminalDrawLine($this->terminalWidth);
             echo PHP_EOL,$outPut;
         }
-    }
-
-    //欢迎画面
-    private function welcome (){
-        $outPut = "";
-        $outPut .= $this->terminalDrawLine(52);
-        $outPut .= $this->terminalDrawRow("+      _       _   _     __  __            +",52,"middle");
-        $outPut .= $this->terminalDrawRow("|     | |     (_) | |_  |  \/  |  ___      |",52,"middle");
-        $outPut .= $this->terminalDrawRow("|     | |     | | | __| | |\/| | / __|     |",52,"middle");
-        $outPut .= $this->terminalDrawRow("|     | |___  | | | |_  | |  | | \__ \     |",52,"middle");
-        $outPut .= $this->terminalDrawRow(".     |_____| |_|  \__| |_|  |_| |___/     .",52,"middle");
-        $outPut .= $this->terminalDrawRow(" ",52,"middle");
-        $outPut .= $this->terminalDrawLine(52);
-        foreach(@swoole_get_local_ip() as $key => $val) {
-            $outPut .= $this->terminalDrawRow("IP address for ".$key.": ".$val,52,"left");
-        }
-        $httpHost = "Use http://".$this->httpHost.":".$this->httpPort;
-        $outPut .= $this->terminalDrawRow($httpHost,52,"left");
-        $outPut .= $this->terminalDrawLine(52);
-        $outPut .= $this->terminalDrawRow(" Power By Ghost ",52,"right");
-        $outPut .= $this->terminalDrawRow("ghostong@126.com",52,"right");
-        $outPut .= $this->terminalDrawLine(52);
-        echo $outPut;
     }
 
     //启动服务
@@ -268,39 +249,15 @@ class LitMsServer{
         $this->safeDir();
         //设置框架常量
         $this->setDefault();
-        //当启动时调用
-        $this->onStart();
-        //欢迎词
-        $this->welcome();
-        //启动服务
-        $this->serverStart();
-    }
-
-
-    //终端线
-    private function terminalDrawLine( $width ){
-        $start = "+";
-        $end = "+";
-        $line = $start . str_repeat("-",$width-2) . $end .PHP_EOL;
-        return $line;
-    }
-
-    //终端行
-    private function terminalDrawRow( $str, $width , $margin){
-        $start = "|";
-        $end = "|";
-        if(strlen($str)+4 >= $width){
-            $str = substr($str,0,$width-4);
-        }
-        if ($margin == "right") {
-            $str = $str." ";
-            $line = $start.str_repeat(" ",$width-2-strlen($str)).$str.$end.PHP_EOL;
-        }elseif($margin == "middle"){
-            $line = $start.str_repeat(" ",ceil(($width-2-strlen($str))/2)).$str.str_repeat(" ",floor(($width-2-strlen($str))/2)).$end.PHP_EOL;
+        if ( LitMsSchedule::isSchedule() ) { //如果是定时任务
+            echo LitMsTerminalDraw::scheduleWelcome( $this->terminalWidth );
         }else{
-            $str = " ".$str;
-            $line = $start.$str.str_repeat(" ",$width-2-strlen($str)).$end.PHP_EOL;
+            //当启动时调用
+            $this->onStart();
+            //欢迎词
+            echo LitMsTerminalDraw::httpServerWelcome( $this->terminalWidth, $this->sslConnect, $this->httpHost, $this->httpPort );
+            //启动服务
+            $this->serverStart();
         }
-        return $line;
     }
 }
