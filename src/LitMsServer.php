@@ -166,7 +166,9 @@ class LitMsServer{
         if(!is_dir($modelDir)){
             echo "未找到Model目录:".$modelDir.PHP_EOL;
         }else{
-            set_include_path(get_include_path().PATH_SEPARATOR.$modelDir);
+            spl_autoload_register(function($className) use ($modelDir){
+                require $modelDir.$className.".php";
+            });
         }
     }
 
@@ -223,16 +225,16 @@ class LitMsServer{
 
     //启动服务
     private function serverStart(){
-        try {
-            $filter = new \Filter();
-            $controller = new \Controller();
-            if ( $this->sslConnect ){
-                $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort, SWOOLE_PROCESS, SWOOLE_SOCK_TCP | SWOOLE_SSL);
-            }else{
-                $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
-            }
-            $httpServer->set($this->serverConfig);
-            $httpServer->on('request', function ($request, $response) use ($filter,$controller) {
+        $filter = new \Filter();
+        $controller = new \Controller();
+        if ( $this->sslConnect ){
+            $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort, SWOOLE_PROCESS, SWOOLE_SOCK_TCP | SWOOLE_SSL);
+        }else{
+            $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
+        }
+        $httpServer->set($this->serverConfig);
+        $httpServer->on('request', function ($request, $response) use ($filter,$controller) {
+            try {
                 if ($request->server['path_info'] == '/favicon.ico' || $request->server['request_uri'] == '/favicon.ico') {
                     $response->end();
                 }elseif( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){ //如果简单身份认证
@@ -244,12 +246,14 @@ class LitMsServer{
                 }else{ //正常逻辑
                     $response->end($controller->doIt($request, $response));
                 }
-            });
-            echo "Server start !", PHP_EOL;
-            $httpServer->start();
-        }catch ( \Exception $e ) {
-            echo "Server started error :".$e->getMessage(),PHP_EOL;
-        }
+            }catch ( \Exception $e ) {
+                $response->status(500);
+                $response->end(Error(500));
+                echo "Server started error :".$e->getMessage(),PHP_EOL;
+            }
+        });
+        echo "Server start !", PHP_EOL;
+        $httpServer->start();
     }
 
     //启动服务
