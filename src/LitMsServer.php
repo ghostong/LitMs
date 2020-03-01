@@ -190,7 +190,7 @@ class LitMsServer {
 
     //判断是否定时任务启动
     private function isSchedule(){
-        if ( isset($_SERVER["argv"][1]) && strtolower($_SERVER["argv"][1]) == "schedule" ) {
+        if ( isset($_SERVER["argv"][1]) && (strtolower($_SERVER["argv"][1]) == "schedule" || strtolower($_SERVER["argv"][1]) == "crontab") ) {
             return true;
         }else{
             return false;

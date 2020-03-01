@@ -42,7 +42,7 @@ class LitMsTerminalDraw{
         $outPut .= self::terminalDrawRow(".     |_____| |_|  \__| |_|  |_| |___/     .",$terminalWidth,"middle");
         $outPut .= self::terminalDrawRow(" ",$terminalWidth,"middle");
         $outPut .= self::terminalDrawLine($terminalWidth);
-        $outPut .= self::terminalDrawRow("Schedule model start ... ",$terminalWidth,"left");
+        $outPut .= self::terminalDrawRow("Schedule Model ",$terminalWidth,"middle");
         $outPut .= self::terminalDrawLine($terminalWidth);
         $outPut .= self::terminalDrawRow(" Power By Ghost ",$terminalWidth,"right");
         $outPut .= self::terminalDrawRow("ghostong@126.com",$terminalWidth,"right");
