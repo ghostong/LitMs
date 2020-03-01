@@ -91,7 +91,42 @@ return View("HTMLDemo.html");
 return Model("Welcome")->welcome();
 ````
 
-### 启动项目
+6. Filter.php
+````php
+//过滤器文件, 只要方法返回 false, 即过滤器生效.<?php
+class Filter extends Lit\LitMs\LitMsFilter {
+
+    function rule1 ( $request, $response ) {
+        return true;
+    }
+
+    function rule2 ( $request,$response ) {
+        if ($request->get["a"] == 1) {
+            return true;
+        }else{
+            $this->setError(1,__FUNCTION__); //框架返回自定义错误
+            return false;
+        }
+    }
+}
+````
+
+7. Schedule.php
+````php
+//定时任务文件, 参考实例文件.
+<?php
+//在 Y-m-d H:i:s 执行一次
+Lit\LitMs\LitMsSchedule::at( "2020-03-01 21:12:40", function (){
+    echo "at ".date("Y-m-d H:i:s")."\n";
+},"MyAt");
+````
+
+### 启动 HTTP 服务
 ````BASH
 php Server.php 
+````
+
+### 启动 Schedule 服务
+````BASH
+php Server.php Schedule 或 php Server.php Crontab
 ````
