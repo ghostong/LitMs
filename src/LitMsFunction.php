@@ -1,4 +1,8 @@
 <?php
+/**
+ * 基础函数
+ */
+
 //载入模块
 function Model ( $modelName, $instantiate = false ) {
     $className = $modelName."Model";

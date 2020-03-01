@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * 终端绘图类
+ */
 namespace Lit\LitMs;
 
 
@@ -26,7 +28,7 @@ class LitMsTerminalDraw{
         $outPut .= self::terminalDrawRow(" Power By Ghost ",$terminalWidth,"right");
         $outPut .= self::terminalDrawRow("ghostong@126.com",$terminalWidth,"right");
         $outPut .= self::terminalDrawLine($terminalWidth);
-        return $outPut;
+        echo $outPut;
     }
 
     //Schedule 欢迎画面
@@ -45,7 +47,7 @@ class LitMsTerminalDraw{
         $outPut .= self::terminalDrawRow(" Power By Ghost ",$terminalWidth,"right");
         $outPut .= self::terminalDrawRow("ghostong@126.com",$terminalWidth,"right");
         $outPut .= self::terminalDrawLine($terminalWidth);
-        return $outPut;
+        echo $outPut;
     }
 
 

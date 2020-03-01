@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * 项目入口
+ */
+
 date_default_timezone_set("Asia/Shanghai");
 
 //autoload

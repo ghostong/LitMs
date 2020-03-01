@@ -1,6 +1,6 @@
 <?php
 /**
- * 过滤器
+ * 过滤器基础类
  */
 
 namespace Lit\LitMs;

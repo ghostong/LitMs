@@ -1,4 +1,8 @@
 <?php
+/**
+ * LitMs 启动时执行一次
+ */
+
 
 function LitMsOnStart(){
 

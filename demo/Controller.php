@@ -1,6 +1,6 @@
 <?php
 /**
- * LitMs Controller 层
+ * LitMs 控制层
  */
 
 class Controller extends Lit\LitMs\LitMsController {

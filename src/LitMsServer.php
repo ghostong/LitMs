@@ -1,6 +1,6 @@
 <?php
 /**
- * 基础服务
+ * 微服务基础类
  */
 namespace Lit\LitMs;
 
@@ -132,12 +132,12 @@ class LitMsServer {
     //框架基础文件
     private function requireBaseFile(){
         $fileList= [
-            "LitMsTerminalDraw"=> $this->litMsDir."LitMsTerminalDraw.php", //函数文件
+            "LitMsTerminalDraw"=> $this->litMsDir."LitMsTerminalDraw.php", //绘图类
             "LitMsFunction"    => $this->litMsDir."LitMsFunction.php", //函数文件
             "LitMsFilter"      => $this->litMsDir."LitMsFilter.php", //基础过滤器文件
             "LitMsController"  => $this->litMsDir."LitMsController.php", //基础控制文件
             "LitMsModel"       => $this->litMsDir."LitMsModel.php", //基础模块文件
-            "LitMsSchedule"    => $this->litMsDir."LitMsSchedule.php" //定时任务
+            "LitMsSchedule"    => $this->litMsDir."LitMsSchedule.php" //定时任务模块文件
         ];
         foreach ( $fileList as $name => $file) {
             if( !file_exists($file) ){
@@ -153,7 +153,6 @@ class LitMsServer {
         $fileList= [
             "Filter"     => $this->workDir."Filter.php",    //过滤器文件
             "Controller" => $this->workDir."Controller.php" ,//路由控制文件
-            "Schedule" => $this->workDir."Schedule.php" //定时任务
         ];
         foreach ( $fileList as $name => $file) {
             if( !file_exists($file) ){
@@ -189,6 +188,15 @@ class LitMsServer {
         define("LITMS_WORK_DIR",$this->workDir);
     }
 
+    //判断是否定时任务启动
+    private function isSchedule(){
+        if ( isset($_SERVER["argv"][1]) && strtolower($_SERVER["argv"][1]) == "schedule" ) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     //启动前时调用一次
     private function onStart () {
         if ( $this->onStartFile ) {
@@ -202,6 +210,12 @@ class LitMsServer {
             $outPut .= LitMsTerminalDraw::terminalDrawLine($this->terminalWidth);
             echo PHP_EOL,$outPut;
         }
+    }
+
+    //定时任务启动
+    private function scheduleStart(){
+        require ($this->workDir."Schedule.php");
+        echo "Schedule start !",PHP_EOL;
     }
 
     //启动服务
@@ -249,13 +263,16 @@ class LitMsServer {
         $this->safeDir();
         //设置框架常量
         $this->setDefault();
-        if ( LitMsSchedule::isSchedule() ) { //如果是定时任务
-            echo LitMsTerminalDraw::scheduleWelcome( $this->terminalWidth );
+        if ($this->isSchedule()) { //如果是定时任务
+            //欢迎词
+            LitMsTerminalDraw::scheduleWelcome( $this->terminalWidth );
+            //启动服务
+            $this->scheduleStart();
         }else{
             //当启动时调用
             $this->onStart();
             //欢迎词
-            echo LitMsTerminalDraw::httpServerWelcome( $this->terminalWidth, $this->sslConnect, $this->httpHost, $this->httpPort );
+            LitMsTerminalDraw::httpServerWelcome( $this->terminalWidth, $this->sslConnect, $this->httpHost, $this->httpPort );
             //启动服务
             $this->serverStart();
         }

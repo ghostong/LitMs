@@ -1,6 +1,6 @@
 <?php
 /**
- * 基础模块层
+ * 模块基础类
  */
 namespace Lit\LitMs;
 
