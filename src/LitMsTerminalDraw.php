@@ -2,7 +2,7 @@
 /**
  * 终端绘图类
  */
-namespace Lit\LitMs;
+namespace Lit\Ms;
 
 
 class LitMsTerminalDraw{

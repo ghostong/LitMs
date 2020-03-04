@@ -2,7 +2,7 @@
 /**
  * 控制层基础类
  */
-namespace Lit\LitMs;
+namespace Lit\Ms;
 
 class LitMsController{
 

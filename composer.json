@@ -1,5 +1,5 @@
 {
-    "name": "lit/litms",
+    "name": "lit/ms",
     "description": "超轻量级PHP微服务框架",
     "authors": [
         {
@@ -18,7 +18,7 @@
     "autoload": {
         "files": [],
         "psr-4": {
-            "Lit\\LitMs\\": "src"
+            "Lit\\Ms\\": "src"
         }
     }
 }

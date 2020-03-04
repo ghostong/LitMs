@@ -3,7 +3,7 @@
  * 过滤器基础类
  */
 
-namespace Lit\LitMs;
+namespace Lit\Ms;
 
 
 class LitMsFilter {

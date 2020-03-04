@@ -3,7 +3,7 @@
 #编辑composer.json文件
 "require" : {
      ...
-     "lit/litms": "dev-master"
+     "lit/ms": "dev-master"
 }
 #安装后使用文档中的调用方法即可使用.
 ````
@@ -19,7 +19,7 @@
 <?php
 //autoload
 require(dirname(__DIR__).'/vendor/autoload.php');
-$server = new \Lit\LitMs\LitMsServer();
+$server = new \Lit\Ms\LitMsServer();
 $server
     ->setHttpHost("0.0.0.0")    //设置监听host ip
     ->setHttpPort(9000)    //设置 监听端口
@@ -42,7 +42,7 @@ $server
 2. Controller.php 
 ````PHP
 <?php
-class Controller extends Lit\LitMs\LitMsController {
+class Controller extends Lit\Ms\LitMsController {
     function __construct(){
         //注册一个全method路由
         $this->all('/',function ($request,$response){
@@ -94,7 +94,7 @@ return Model("Welcome")->welcome();
 6. Filter.php
 ````php
 //过滤器文件, 只要方法返回 false, 即过滤器生效.<?php
-class Filter extends Lit\LitMs\LitMsFilter {
+class Filter extends Lit\Ms\LitMsFilter {
 
     function rule1 ( $request, $response ) {
         return true;
@@ -116,7 +116,7 @@ class Filter extends Lit\LitMs\LitMsFilter {
 //定时任务文件, 参考实例文件.
 <?php
 //在 Y-m-d H:i:s 执行一次
-Lit\LitMs\LitMsSchedule::at( "2020-03-01 21:12:40", function (){
+Lit\Ms\LitMsSchedule::at( "2020-03-01 21:12:40", function (){
     echo "at ".date("Y-m-d H:i:s")."\n";
 },"MyAt");
 ````

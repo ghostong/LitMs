@@ -2,7 +2,7 @@
 /**
  * 模块基础类
  */
-namespace Lit\LitMs;
+namespace Lit\Ms;
 
 class LitMsModel{
 

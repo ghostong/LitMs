@@ -3,7 +3,7 @@
  * 定时器基础类
  */
 
-namespace Lit\LitMs;
+namespace Lit\Ms;
 
 class LitMsSchedule{
 

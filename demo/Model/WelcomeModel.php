@@ -3,7 +3,7 @@
  * 测试模块
  */
 
-class WelcomeModel extends Lit\LitMs\LitMsModel {
+class WelcomeModel extends Lit\Ms\LitMsModel {
 
     public function welcome () {
 
