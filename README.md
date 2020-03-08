@@ -132,5 +132,5 @@ php Server.php Schedule 或 php Server.php Crontab
 ````
 ### 启动 Shell 
 ````BASH
-php Server.php shell ModelName/FunctionName 或 php Server.php command ModelName/FunctionName
+php Server.php Shell ModelName/FunctionName 或 php Server.php Command ModelName/FunctionName
 ````
