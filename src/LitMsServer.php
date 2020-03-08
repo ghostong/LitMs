@@ -197,6 +197,15 @@ class LitMsServer {
         }
     }
 
+    //判断是否定时任务启动
+    private function isShell(){
+        if ( isset($_SERVER["argv"][1]) && (strtolower($_SERVER["argv"][1]) == "shell" || strtolower($_SERVER["argv"][1]) == "command") ) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     //启动前时调用一次
     private function onStart () {
         if ( $this->onStartFile ) {
@@ -216,6 +225,16 @@ class LitMsServer {
     private function scheduleStart(){
         require ($this->workDir."Schedule.php");
         echo "Schedule start !",PHP_EOL;
+    }
+
+    //单次shell
+    private function shellStart(){
+        if ( isset($_SERVER["argv"][2]) ) {
+            $exp = explode( "/",$_SERVER["argv"][2] );
+            call_user_func([Model($exp[0]),$exp[1]] );
+        }else{
+            echo "args is empty",PHP_EOL;
+        }
     }
 
     //启动服务
@@ -268,6 +287,9 @@ class LitMsServer {
             LitMsTerminalDraw::scheduleWelcome( $this->terminalWidth );
             //启动服务
             $this->scheduleStart();
+        }elseif($this->isShell()){ //如果是单次Shell
+            //运行Shell
+            $this->shellStart();
         }else{
             //当启动时调用
             $this->onStart();
