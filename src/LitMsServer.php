@@ -224,7 +224,7 @@ class LitMsServer {
     //定时任务启动
     private function scheduleStart(){
         require ($this->workDir."Schedule.php");
-        echo "Schedule start !",PHP_EOL;
+        echo "Schedule start @",date("Y-m-d H:i:s"),PHP_EOL;
     }
 
     //单次shell
