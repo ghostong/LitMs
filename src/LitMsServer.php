@@ -263,10 +263,10 @@ class LitMsServer {
             }catch ( \Exception $e ) {
                 $response->status(500);
                 $response->end(Error(500));
-                echo "Server started error :".$e->getMessage(),PHP_EOL;
+                echo "Exception: ".$e->getMessage(),PHP_EOL;
             }
         });
-        echo "Server start !", PHP_EOL;
+        echo "Server start @",date("Y-m-d H:i:s"), PHP_EOL;
         $httpServer->start();
     }
 
