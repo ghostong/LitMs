@@ -209,15 +209,7 @@ class LitMsServer {
     //启动前时调用一次
     private function onStart () {
         if ( $this->onStartFile ) {
-            $outPut = "";
-            $outPut .= LitMsTerminalDraw::terminalDrawLine($this->terminalWidth);
-            $outPut .= LitMsTerminalDraw::terminalDrawRow("On Start v",$this->terminalWidth,"middle");
-            echo $outPut,PHP_EOL;
             require_once ($this->onStartFile."");
-            $outPut = "";
-            $outPut .= LitMsTerminalDraw::terminalDrawRow("On Start ^",$this->terminalWidth,"middle");
-            $outPut .= LitMsTerminalDraw::terminalDrawLine($this->terminalWidth);
-            echo PHP_EOL,$outPut;
         }
     }
 
