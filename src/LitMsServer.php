@@ -274,6 +274,9 @@ class LitMsServer {
         $this->safeDir();
         //设置框架常量
         $this->setDefault();
+        //当启动时调用
+        $this->onStart();
+
         if ($this->isSchedule()) { //如果是定时任务
             //欢迎词
             LitMsTerminalDraw::scheduleWelcome( $this->terminalWidth );
@@ -283,8 +286,6 @@ class LitMsServer {
             //运行Shell
             $this->shellStart();
         }else{
-            //当启动时调用
-            $this->onStart();
             //欢迎词
             LitMsTerminalDraw::httpServerWelcome( $this->terminalWidth, $this->sslConnect, $this->httpHost, $this->httpPort );
             //启动服务
