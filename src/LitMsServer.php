@@ -170,7 +170,9 @@ class LitMsServer {
             echo "未找到Model目录:".$modelDir.PHP_EOL;
         }else{
             spl_autoload_register(function($className) use ($modelDir){
-                require $modelDir.$className.".php";
+                if ( is_file( $modelDir.$className.".php" ) ) {
+                    require $modelDir.$className.".php";
+                }
             });
         }
     }
