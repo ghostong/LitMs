@@ -1,15 +1,11 @@
 ### 安装
 ````
-#编辑composer.json文件
-"require" : {
-     ...
-     "lit/ms": "dev-master"
-}
-#安装后使用文档中的调用方法即可使用.
+#执行如下命令安装,安装后使用文档中的调用方法即可使用.
+composer require lit/ms
 ````
 
 ### 初始化项目
-1. composer安装好项目后,复制 vendor/lit/litms/demo 目录中的文件到项目目录.
+1. composer安装好项目后,下载 https://github.com/ghostong/help/tree/master/LitMs/demo 地址中的文件到项目目录.
 2. 修改 Server.php 中 autoload 为自己的 vendor/autoload.php .
 3. 修改 Server.php 的配置项, 每个配置项都有系统默认值
 
@@ -39,41 +35,52 @@ $server
     ->run();
 ````
 
-2. Controller.php 
+2. Route.php 
 ````PHP
 <?php
-class Controller extends Lit\Ms\LitMsController {
+/**
+ * LitMs 路由
+ */
+
+class Route extends Lit\Ms\LitMsRoute {
+
     function __construct(){
+
         //注册一个全method路由
-        $this->all('/',function ($request,$response){
-            return Model("Welcome")->welcome();
+        $this->all('/',function ( $request, $response ) {
+            return (new WelcomeController())->welcome( $request, $response );
         });
+
         //注册另一个get路由
-        $this->get("/get",function ($request,$response){
-            return "Method get";
+        $this->get("/get",function ( $request, $response ) {
+            return (new Lit\Ms\LitMsResponse())->string("Method get");
         });
+
         //注册另一个post路由
-        $this->post("/post",function ($request,$response){
-            return "Method post";
+        $this->post("/post",function ( $request, $response ) {
+            return (new Lit\Ms\LitMsResponse())->string("Method post");
         });
+
         //注册另一个delete路由
-        $this->delete("/delete",function ($request,$response){
-            return "Method delete";
+        $this->delete("/delete",function ( $request, $response ) {
+            return (new Lit\Ms\LitMsResponse())->string("Method delete");
         });
+
         //注册另一个静态页面
-        $this->get("/html",function ($request,$response){
-            return View("HtmlDemo.html");
+        $this->get("/html",function ( $request,$response ) {
+            return (new \Lit\Ms\LitMsResponse)->html("HtmlDemo.html");
         });
+
     }
+
 }
 ````
 
-3. Viwe 目录
+3. Controller 目录
 ````php
 <?php
-//此目录为静态HTML文件目录, 通过如下代码直接读取此文件
-//本框架为动态微服务框架,尽量不要使用静态文件和静态HTML
-return View("HTMLDemo.html");
+//创建 WelcomeController.php 类文件可直接使用 (new WelcomeController())->方法名()调用
+return (new WelcomeController())->welcome();
 ````
 
 4. Static 目录
@@ -84,14 +91,21 @@ return View("HTMLDemo.html");
 本框架为动态微服务框架,尽量不要使用静态文件和静态HTML
 ````
 
-5. Model
+5. View 目录
 ````php
-<?php
-//创建 WelcomeModel.php 类文件可直接使用 Model("Welcome")->方法名()调用
-return Model("Welcome")->welcome();
+此目录为视图文件目录, 通过一下方法可以直接访问
+(new \Lit\Ms\LitMsResponse)->html("HtmlDemo.html");
+本框架为动态微服务框架,尽量不要使用静态文件和静态HTML
 ````
 
-6. Filter.php
+6. Model 目录
+````php
+<?php
+//创建 WelcomeModel.php 类文件可直接使用 (new WelcomeModel())->方法名()调用
+return (new WelcomeModel())->welcome();
+````
+
+7. Filter.php
 ````php
 //过滤器文件, 只要方法返回 false, 即过滤器生效.<?php
 class Filter extends Lit\Ms\LitMsFilter {
@@ -111,7 +125,7 @@ class Filter extends Lit\Ms\LitMsFilter {
 }
 ````
 
-7. Schedule.php
+8. Schedule.php
 ````php
 //定时任务文件, 参考实例文件.
 <?php

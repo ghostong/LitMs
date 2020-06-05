@@ -55,8 +55,7 @@ class LitMsTerminalDraw{
     public static function terminalDrawLine( $width ){
         $start = "+";
         $end = "+";
-        $line = $start . str_repeat("-",$width-2) . $end .PHP_EOL;
-        return $line;
+        return $start . str_repeat("-",$width-2) . $end .PHP_EOL;
     }
 
     //终端行

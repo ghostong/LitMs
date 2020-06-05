@@ -2,6 +2,7 @@
 /**
  * 微服务基础类
  */
+
 namespace Lit\Ms;
 
 class LitMsServer {
@@ -129,30 +130,11 @@ class LitMsServer {
         return $this;
     }
 
-    //框架基础文件
-    private function requireBaseFile(){
-        $fileList= [
-            "LitMsTerminalDraw"=> $this->litMsDir."LitMsTerminalDraw.php", //绘图类
-            "LitMsFunction"    => $this->litMsDir."LitMsFunction.php", //函数文件
-            "LitMsFilter"      => $this->litMsDir."LitMsFilter.php", //基础过滤器文件
-            "LitMsController"  => $this->litMsDir."LitMsController.php", //基础控制文件
-            "LitMsModel"       => $this->litMsDir."LitMsModel.php", //基础模块文件
-            "LitMsSchedule"    => $this->litMsDir."LitMsSchedule.php" //定时任务模块文件
-        ];
-        foreach ( $fileList as $name => $file) {
-            if( !file_exists($file) ){
-                echo "未找到".$name."文件: ".$file.PHP_EOL;
-            }else{
-                require( $file."" );
-            }
-        }
-    }
-
     //导如用户必定义文件
     private function requireUserFile(){
         $fileList= [
-            "Filter"     => $this->workDir."Filter.php",    //过滤器文件
-            "Controller" => $this->workDir."Controller.php" ,//路由控制文件
+            "Filter" => $this->workDir."Filter.php", //过滤器文件
+            "Route"  => $this->workDir."Route.php" , //路由控制文件
         ];
         foreach ( $fileList as $name => $file) {
             if( !file_exists($file) ){
@@ -164,7 +146,17 @@ class LitMsServer {
     }
 
     //用户自动加载
-    private function requireModelFile () {
+    private function setAutoload () {
+        //Controller
+        $controllerDir = $this->workDir."Controller".DIRECTORY_SEPARATOR;
+        if(!is_dir($controllerDir)){
+            echo "未找到Controller目录:".$controllerDir.PHP_EOL;
+        }else{
+            spl_autoload_register(function($className) use ($controllerDir){
+                is_file( $controllerDir.$className.".php" ) && require $controllerDir.$className.".php";
+            });
+        }
+        //Model
         $modelDir = $this->workDir."Model".DIRECTORY_SEPARATOR;
         if(!is_dir($modelDir)){
             echo "未找到Model目录:".$modelDir.PHP_EOL;
@@ -185,7 +177,7 @@ class LitMsServer {
     //设置框架常量
     private function setDefault (){
         //默认项目目录常量
-        define("LITMS_WORK_DIR",$this->workDir);
+        define( "LITMS_WORK_DIR", $this->workDir );
     }
 
     //判断是否定时任务启动
@@ -229,32 +221,52 @@ class LitMsServer {
         }
     }
 
+    //简单身份认证
+    private function easyAuthenticate( $request ) {
+        if (isset($request->header["authorization"])) {
+            $authorStr = $request->header["authorization"];
+            $expAuthor = explode(" ", $authorStr);
+            $queryVerify = end($expAuthor);
+            foreach ($this->authDict as $userName => $passWord) {
+                $verify = base64_encode($userName . ":" . $passWord);
+                if ($verify === $queryVerify) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     //启动服务
     private function serverStart(){
         $filter = new \Filter();
-        $controller = new \Controller();
+        $route = new \Route();
         if ( $this->sslConnect ){
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort, SWOOLE_PROCESS, SWOOLE_SOCK_TCP | SWOOLE_SSL);
         }else{
             $httpServer = new \Swoole\Http\Server($this->httpHost, $this->httpPort);
         }
         $httpServer->set($this->serverConfig);
-        $httpServer->on('request', function ($request, $response) use ($filter,$controller) {
+        $httpServer->on('request', function ($request, $response) use ( $filter, $route ) {
             try {
                 if ($request->server['path_info'] == '/favicon.ico' || $request->server['request_uri'] == '/favicon.ico') {
                     $response->end();
-                }elseif( $this->isAuthenticate && !EasyAuthenticate($request, $this->authDict) ){ //如果简单身份认证
+                } elseif ( $this->isAuthenticate && !$this->easyAuthenticate( $request ) ) { //如果简单身份认证
                     $response->header('WWW-Authenticate','Basic realm="LitMs"');
                     $response->status(401);
-                    $response->end(Error(403));
-                }elseif(!$filter->doIt($request, $response) ){ //如果过滤器
-                    $response->end(Error($filter->getErrorCode(),$filter->getErrorMessage()));
-                }else{ //正常逻辑
-                    $response->end($controller->doIt($request, $response));
+                    $response->end( (new LitMsResponse())->error("401","Unauthorized") );
+                } elseif ( !$filter->run($request, $response) ) { //如果过滤器
+                    $response->end(
+                        (new LitMsResponse())->setStatusCode(403)->error( $filter->getErrorCode(), $filter->getErrorMessage() )
+                    );
+                } else { //正常逻辑
+                    $litMsResponse = $route->run($request, $response);
+                    $response->status($litMsResponse->getStatusCode());
+                    $response->end($litMsResponse);
                 }
-            }catch ( \Exception $e ) {
+            } catch ( \Exception $e ) {
                 $response->status(500);
-                $response->end(Error(500));
+                $response->end( (new LitMsResponse())->error("500","Internal Server Error") );
                 echo "Exception: ".$e->getMessage(),PHP_EOL;
             }
         });
@@ -264,12 +276,10 @@ class LitMsServer {
 
     //启动服务
     public function run () {
-        //载入框架基础文件
-        $this->requireBaseFile();
         //导入用户必定义文件
         $this->requireUserFile();
-        //载入用户自定义模块
-        $this->requireModelFile();
+        //自动加载
+        $this->setAutoload();
         //安全目录
         $this->safeDir();
         //设置框架常量

@@ -5,13 +5,18 @@
 
 namespace Lit\Ms;
 
-
 class LitMsFilter {
 
     private static $errorMessage = null;
     private static $errorCode = null;
 
-    public function doIt( $request , $response ){
+    /**
+     * 启动过滤器
+     * @param $request
+     * @param $response
+     * @return bool
+     */
+    public function run( $request , $response ) : bool {
         $className = get_called_class();
         $filter = new $className ();
         $methodSon = get_class_methods( get_called_class() );
@@ -28,6 +33,9 @@ class LitMsFilter {
         return true;
     }
 
+    /**
+     * 过滤器拦截错误信息码
+     */
     public function getErrorCode() {
         return self::$errorCode;
     }
@@ -36,6 +44,9 @@ class LitMsFilter {
         self::$errorCode = $errorCode;
     }
 
+    /**
+     * 过滤器拦截错误信息
+     */
     public function getErrorMessage(){
         return self::$errorMessage;
     }
